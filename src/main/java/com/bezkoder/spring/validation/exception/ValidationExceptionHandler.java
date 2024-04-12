@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,4 +28,16 @@ public class ValidationExceptionHandler {
 
     return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
   }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
+    String errorMessage = ex.getConstraintViolations()
+            .stream()
+            .findFirst()
+            .map(violation -> violation.getMessage())
+            .orElse("Validation failed");
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+  }
+
 }
